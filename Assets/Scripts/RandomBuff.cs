@@ -2,14 +2,6 @@ using UnityEngine;
 using Unity.Netcode;
 public class RandomBuff : NetworkBehaviour
 {
-    
-    void Start()
-    {
-        
-    }
-
-   
- 
 
     private void OnTriggerEnter(Collider other)
     {

@@ -1,54 +1,44 @@
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
+
 public class SimplePlayerController : NetworkBehaviour
 {
-
-    public NetworkVariable<ulong> PlayerID;
-
-    public float Speed;
-    public float JumpForce = 5f;
-
-    [SerializeField]private Animator animator; 
-    private Rigidbody rb;
+    public NetworkVariable<ulong> PlayerID = new NetworkVariable<ulong>();
+    public float speed;
+    public float jumpForce = 5f;
     public LayerMask groundLayer;
-    
+    private Rigidbody rb;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
     }
 
-  
-    public void Update()
+    void Update()
     {
         if (!IsOwner) return;
 
-        if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+        float x = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
+        float y = Input.GetAxis("Vertical") * speed * Time.deltaTime;
+
+        if (x != 0 || y != 0)
         {
-            float VelX = Input.GetAxisRaw("Horizontal") *Speed *Time.deltaTime;
-            float VelY = Input.GetAxisRaw("Vertical") * Speed * Time.deltaTime;
-            MovePlayerServerRpc(VelX, VelY);
+            MoveServerRpc(x, y);
         }
 
-
-
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (IsGrounded() && Input.GetKeyDown(KeyCode.Space))
         {
-            animator.SetTrigger("Jump");
+            JumpServerRpc();
         }
-        CheckGroundRpc();
     }
 
-    
-
-    [Rpc(SendTo.Server)]
-    public void AnimatorSetTriggerRpc(string animationName)
+    private bool IsGrounded()
     {
-        animator.SetTrigger(animationName);
+        return Physics.Raycast(transform.position, Vector3.down, 1.1f, groundLayer);
     }
 
     [ServerRpc]
-    private void MovePlayerServerRpc(float x, float y)
+    private void MoveServerRpc(float x, float y)
     {
         if (rb != null)
         {
@@ -56,36 +46,12 @@ public class SimplePlayerController : NetworkBehaviour
         }
     }
 
-
-    [Rpc(SendTo.Server)]
-    public void UpdatePositionRpc(float x, float y)
+    [ServerRpc]
+    private void JumpServerRpc()
     {
-        transform.position += new Vector3(x, 0, y);
-    }
-
-
-    [Rpc(SendTo.Server)]
-    public void JumpTriggerRpc(string animationName)
-    {
-        rb = GetComponent<Rigidbody>();
-        rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
-        animator.SetTrigger(animationName);
-    }
-
-
-    [Rpc(SendTo.Server)]
-    public void CheckGroundRpc()
-    {
-        if (Physics.Raycast(transform.position, Vector3.down, 1.1f, groundLayer))
+        if (rb != null && IsGrounded())
         {
-            animator.SetBool("Grounded", true);
-            animator.SetBool("FreeFall", false);
-        }
-        else
-        {
-            animator.SetBool("Grounded", false);
-            animator.SetBool("FreeFall", true);
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
     }
-
 }
