@@ -601,12 +601,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  player: {fileID: 0}
-  buffer: {fileID: 0}
-  enemyPrefab: {fileID: 0}
-  spawnCount: 0
-  currentCount: 0
-  enemySpawnInterval: 0
+  playerPrefab: {fileID: 1715044866870972932, guid: c61d5726e03df3e42b54b44e8b0253d1, type: 3}
+  buffPrefab: {fileID: 6314348777443647548, guid: c5c8bfab7ac65534482fef18fb08fe30, type: 3}
+  enemyPrefab: {fileID: 4881954512228245090, guid: 165981f7be413474f823bf211fee7b8e, type: 3}
+  buffSpawnInterval: 4
+  enemySpawnInterval: 2
   maxEnemies: 3
   enemySpawnRadius: 10
 --- !u!1 &1432816148
@@ -834,8 +833,8 @@ SceneRoots:
   m_Roots:
   - {fileID: 330585546}
   - {fileID: 410087041}
+  - {fileID: 645043822}
   - {fileID: 832575519}
   - {fileID: 1531605226}
   - {fileID: 1241067230}
-  - {fileID: 645043822}
   - {fileID: 1432816152}

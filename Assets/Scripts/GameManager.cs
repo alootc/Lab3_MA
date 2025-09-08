@@ -21,6 +21,7 @@ public class GameManager : NetworkBehaviour
     private float enemyTimer = 0f;
     private int currentEnemies = 0;
     private List<GameObject> activeEnemies = new List<GameObject>();
+    private bool isNetworkReady = false;
 
     void Awake()
     {
@@ -28,6 +29,10 @@ public class GameManager : NetworkBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            Debug.Log("Player Prefab: " + (playerPrefab != null ? "Assigned" : "NULL"));
+            Debug.Log("Buff Prefab: " + (buffPrefab != null ? "Assigned" : "NULL"));
+            Debug.Log("Enemy Prefab: " + (enemyPrefab != null ? "Assigned" : "NULL"));
         }
         else
         {
@@ -37,13 +42,18 @@ public class GameManager : NetworkBehaviour
 
     private void Update()
     {
-        if (NetworkManager.Singleton == null) return;
+        if (!isNetworkReady) return;
+        if (!IsServer) return;
 
-        if (IsServer)
-        {
-            HandleBuffSpawning();
-            HandleEnemySpawning();
-        }
+        HandleBuffSpawning();
+        HandleEnemySpawning();
+    }
+
+    // Método para verificar cuando la red está lista
+    public void SetNetworkReady(bool ready)
+    {
+        isNetworkReady = ready;
+        Debug.Log("Network ready: " + ready);
     }
 
     private void HandleBuffSpawning()
@@ -68,15 +78,50 @@ public class GameManager : NetworkBehaviour
 
     void SpawnBuff()
     {
-        if (buffPrefab == null) return;
+        if (buffPrefab == null)
+        {
+            Debug.LogError("Buff prefab is not assigned in GameManager!");
+            return;
+        }
+
+        // Verificar que NetworkManager esté escuchando
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
+        {
+            Debug.LogWarning("NetworkManager is not listening. Cannot spawn buff.");
+            return;
+        }
 
         Vector3 randomPosition = new Vector3(Random.Range(-8, 8), 0.5f, Random.Range(-8, 8));
         GameObject buff = Instantiate(buffPrefab, randomPosition, Quaternion.identity);
-        buff.GetComponent<NetworkObject>().Spawn(true);
+
+        NetworkObject networkObject = buff.GetComponent<NetworkObject>();
+        if (networkObject != null)
+        {
+            networkObject.Spawn(true);
+            Debug.Log("Buff spawned at position: " + randomPosition);
+        }
+        else
+        {
+            Debug.LogError("Instantiated buff is missing NetworkObject component!");
+            Destroy(buff);
+        }
     }
 
     void SpawnEnemy()
     {
+        if (enemyPrefab == null)
+        {
+            Debug.LogError("Enemy prefab is not assigned in GameManager!");
+            return;
+        }
+
+        // Verificar que NetworkManager esté escuchando
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
+        {
+            Debug.LogWarning("NetworkManager is not listening. Cannot spawn enemy.");
+            return;
+        }
+
         Vector3 spawnPosition = GetValidSpawnPosition();
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
 
@@ -84,7 +129,12 @@ public class GameManager : NetworkBehaviour
         if (enemyNetObj != null)
         {
             enemyNetObj.Spawn(true);
-            enemy.GetComponent<Enemy>().SetGameManager(this);
+
+            Enemy enemyComponent = enemy.GetComponent<Enemy>();
+            if (enemyComponent != null)
+            {
+                enemyComponent.SetGameManager(this);
+            }
         }
 
         activeEnemies.Add(enemy);
@@ -142,7 +192,11 @@ public class GameManager : NetworkBehaviour
         {
             if (enemy != null)
             {
-                enemy.GetComponent<NetworkObject>().Despawn();
+                NetworkObject netObj = enemy.GetComponent<NetworkObject>();
+                if (netObj != null)
+                {
+                    netObj.Despawn();
+                }
                 Destroy(enemy);
             }
         }
@@ -152,9 +206,10 @@ public class GameManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (NetworkManager.Singleton != null && IsServer)
+        if (IsServer)
         {
-            Debug.Log("Connected players: " + NetworkManager.Singleton.ConnectedClients.Count);
+            Debug.Log("GameManager spawned on server");
+            SetNetworkReady(true);
             SpawnPlayers();
         }
     }
@@ -177,10 +232,24 @@ public class GameManager : NetworkBehaviour
         }
 
         GameObject player = Instantiate(playerPrefab);
-        player.GetComponent<SimplePlayerController>().PlayerID.Value = ownerID;
-        player.GetComponent<NetworkObject>().SpawnWithOwnership(ownerID, true);
 
-        Debug.Log("Player spawned for client: " + ownerID);
+        SimplePlayerController playerController = player.GetComponent<SimplePlayerController>();
+        if (playerController != null)
+        {
+            playerController.PlayerID.Value = ownerID;
+        }
+
+        NetworkObject netObj = player.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            netObj.SpawnWithOwnership(ownerID, true);
+            Debug.Log("Player spawned for client: " + ownerID);
+        }
+        else
+        {
+            Debug.LogError("Player prefab is missing NetworkObject component!");
+            Destroy(player);
+        }
     }
 
     public static GameManager GetInstance() { return Instance; }

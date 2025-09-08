@@ -9,14 +9,21 @@ public class SimplePlayerController : NetworkBehaviour
     public LayerMask groundLayer;
     private Rigidbody rb;
 
+    // Variables para el buff de velocidad
+    private float originalSpeed;
+    private float buffExpireTime = 0f;
+    private bool hasSpeedBuff = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        originalSpeed = speed;
     }
 
     void Update()
     {
         if (!IsOwner) return;
+        if (!IsSpawned) return; // Esperar a que el objeto esté spawnedo
 
         float x = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
         float y = Input.GetAxis("Vertical") * speed * Time.deltaTime;
@@ -30,6 +37,18 @@ public class SimplePlayerController : NetworkBehaviour
         {
             JumpServerRpc();
         }
+
+        CheckBuffExpiration();
+    }
+
+    private void CheckBuffExpiration()
+    {
+        if (hasSpeedBuff && Time.time > buffExpireTime)
+        {
+            speed = originalSpeed;
+            hasSpeedBuff = false;
+            Debug.Log("Speed buff expired");
+        }
     }
 
     private bool IsGrounded()
@@ -37,10 +56,23 @@ public class SimplePlayerController : NetworkBehaviour
         return Physics.Raycast(transform.position, Vector3.down, 1.1f, groundLayer);
     }
 
+    public void ApplySpeedBuff(float multiplier, float duration)
+    {
+        speed = originalSpeed * multiplier;
+        buffExpireTime = Time.time + duration;
+        hasSpeedBuff = true;
+        Debug.Log("Speed buff applied! New speed: " + speed);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        Debug.Log("Player took " + damage + " damage");
+    }
+
     [ServerRpc]
     private void MoveServerRpc(float x, float y)
     {
-        if (rb != null)
+        if (rb != null && IsSpawned)
         {
             rb.MovePosition(rb.position + new Vector3(x, 0, y));
         }
@@ -49,7 +81,7 @@ public class SimplePlayerController : NetworkBehaviour
     [ServerRpc]
     private void JumpServerRpc()
     {
-        if (rb != null && IsGrounded())
+        if (rb != null && IsGrounded() && IsSpawned)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }

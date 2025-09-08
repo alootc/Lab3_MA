@@ -3,22 +3,26 @@ using Unity.Netcode;
 
 public class Enemy : NetworkBehaviour
 {
-    public float speed = 3f;
-    public float detectRange = 10f;
-    private Transform playerTarget;
-    private GameManager manager;
+    public float moveSpeed = 3f;
+    public int damage = 10;
 
-    public void SetGameManager(GameManager mgr)
+    private GameManager gameManager;
+    private Transform playerTarget;
+
+    public void SetGameManager(GameManager manager)
     {
-        manager = mgr;
+        gameManager = manager;
     }
 
     public override void OnNetworkSpawn()
     {
-        if (IsServer) FindClosestPlayer();
+        if (IsServer)
+        {
+            FindClosestPlayer();
+        }
     }
 
-    void Update()
+    private void Update()
     {
         if (!IsServer) return;
 
@@ -28,55 +32,58 @@ public class Enemy : NetworkBehaviour
             return;
         }
 
-        float dist = Vector3.Distance(transform.position, playerTarget.position);
-        if (dist > detectRange + 2f)
-        {
-            playerTarget = null;
-            return;
-        }
-
-        Vector3 dir = (playerTarget.position - transform.position).normalized;
-        transform.position += dir * speed * Time.deltaTime;
-        transform.LookAt(new Vector3(playerTarget.position.x, transform.position.y, playerTarget.position.z));
+        Vector3 direction = (playerTarget.position - transform.position).normalized;
+        transform.position += direction * moveSpeed * Time.deltaTime;
     }
 
-    void FindClosestPlayer()
+    private void FindClosestPlayer()
     {
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        float minDist = Mathf.Infinity;
-        playerTarget = null;
+        if (players.Length == 0) return;
 
-        for (int i = 0; i < players.Length; i++)
+        float closestDistance = Mathf.Infinity;
+
+        foreach (GameObject player in players)
         {
-            if (players[i] != null)
+            float distance = Vector3.Distance(transform.position, player.transform.position);
+            if (distance < closestDistance)
             {
-                float d = Vector3.Distance(transform.position, players[i].transform.position);
-                if (d < detectRange && d < minDist)
-                {
-                    minDist = d;
-                    playerTarget = players[i].transform;
-                }
+                closestDistance = distance;
+                playerTarget = player.transform;
             }
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (!IsServer) return;
 
         if (other.CompareTag("Player"))
         {
-            if (manager != null) manager.EnemyDestroyed(gameObject);
-
-            NetworkObject netObj = GetComponent<NetworkObject>();
-            if (netObj != null) netObj.Despawn();
-            Destroy(gameObject);
+            // Hacer daño al jugador
+            SimplePlayerController player = other.GetComponent<SimplePlayerController>();
+            if (player != null)
+            {
+                player.TakeDamage(damage);
+            }
         }
     }
 
-    void OnDrawGizmosSelected()
+    public void Die()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, detectRange);
+        if (gameManager != null)
+        {
+            gameManager.EnemyDestroyed(gameObject);
+        }
+
+        if (IsServer)
+        {
+            NetworkObject netObj = GetComponent<NetworkObject>();
+            if (netObj != null)
+            {
+                netObj.Despawn();
+            }
+            Destroy(gameObject);
+        }
     }
 }
