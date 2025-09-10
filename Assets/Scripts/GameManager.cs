@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 
@@ -49,7 +49,6 @@ public class GameManager : NetworkBehaviour
         HandleEnemySpawning();
     }
 
-    // Método para verificar cuando la red está lista
     public void SetNetworkReady(bool ready)
     {
         isNetworkReady = ready;
@@ -84,7 +83,6 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
-        // Verificar que NetworkManager esté escuchando
         if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
         {
             Debug.LogWarning("NetworkManager is not listening. Cannot spawn buff.");

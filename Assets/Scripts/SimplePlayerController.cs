@@ -9,7 +9,8 @@ public class SimplePlayerController : NetworkBehaviour
     public LayerMask groundLayer;
     private Rigidbody rb;
 
-    // Variables para el buff de velocidad
+    private PlayerHealth playerHealth;
+
     private float originalSpeed;
     private float buffExpireTime = 0f;
     private bool hasSpeedBuff = false;
@@ -18,12 +19,13 @@ public class SimplePlayerController : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody>();
         originalSpeed = speed;
+        playerHealth = GetComponent<PlayerHealth>();
     }
 
     void Update()
     {
         if (!IsOwner) return;
-        if (!IsSpawned) return; // Esperar a que el objeto esté spawnedo
+        if (!IsSpawned) return;
 
         float x = Input.GetAxis("Horizontal") * speed * Time.deltaTime;
         float y = Input.GetAxis("Vertical") * speed * Time.deltaTime;
@@ -66,7 +68,12 @@ public class SimplePlayerController : NetworkBehaviour
 
     public void TakeDamage(int damage)
     {
-        Debug.Log("Player took " + damage + " damage");
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(damage);
+        }
+        Debug.Log("Player took " + damage + " damage. Current health: " +
+                 (playerHealth != null ? playerHealth.currentHealth.Value.ToString() : "N/A"));
     }
 
     [ServerRpc]

@@ -9,11 +9,10 @@ public class NetworkManagerController : MonoBehaviour
     {
         if (gameManager == null)
         {
-            gameManager = FindObjectOfType<GameManager>();
+            gameManager = FindFirstObjectByType<GameManager>();
         }
     }
 
-    // Llamar este método desde un UI Button para iniciar como Host
     public void StartHost()
     {
         if (NetworkManager.Singleton != null)
@@ -27,7 +26,6 @@ public class NetworkManagerController : MonoBehaviour
         }
     }
 
-    // Llamar este método desde un UI Button para iniciar como Server
     public void StartServer()
     {
         if (NetworkManager.Singleton != null)
@@ -41,7 +39,6 @@ public class NetworkManagerController : MonoBehaviour
         }
     }
 
-    // Llamar este método desde un UI Button para iniciar como Client
     public void StartClient()
     {
         if (NetworkManager.Singleton != null)

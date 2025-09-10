@@ -490,11 +490,12 @@ GameObject:
   - component: {fileID: 9022971275982045194}
   - component: {fileID: 2179305784340546449}
   - component: {fileID: 4707229261068160738}
-  - component: {fileID: 4864326062918013730}
-  - component: {fileID: 8173511796698368189}
   - component: {fileID: 5085655306164147581}
   - component: {fileID: 6178262675974544641}
   - component: {fileID: 6614180710108260662}
+  - component: {fileID: 4864326062918013730}
+  - component: {fileID: 8173511796698368189}
+  - component: {fileID: 7563276859586098108}
   m_Layer: 6
   m_Name: SimplePlayerAnimTest
   m_TagString: Player
@@ -618,50 +619,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &4864326062918013730
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1715044866870972932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cef132add0e6a6448965ab7cff9d2197, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  PlayerID:
-    m_InternalValue: 5
-  speed: 5
-  jumpForce: 5
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 64
---- !u!114 &8173511796698368189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1715044866870972932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04185f70e0c67474e8648619e6b9d8de, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  animator: {fileID: 5647915881228006891}
-  rb: {fileID: 9022971275982045194}
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  projectilePrefab: {fileID: 8966704392160475773, guid: c7de00553a2ee0f4fb8293ed2b00da44, type: 3}
-  firePoint: {fileID: 7318727185669832282}
-  jumpForce: 5
-  speed: 8
-  OnMove: 0
-  moveInput: {x: 0, y: 0}
 --- !u!114 &5085655306164147581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -714,9 +671,9 @@ MonoBehaviour:
   SyncPositionX: 1
   SyncPositionY: 1
   SyncPositionZ: 1
-  SyncRotAngleX: 0
-  SyncRotAngleY: 0
-  SyncRotAngleZ: 0
+  SyncRotAngleX: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 1
   SyncScaleX: 1
   SyncScaleY: 1
   SyncScaleZ: 1
@@ -747,6 +704,66 @@ MonoBehaviour:
   UseRigidBodyForMotion: 0
   AutoUpdateKinematicState: 1
   AutoSetKinematicOnDespawn: 1
+--- !u!114 &4864326062918013730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1715044866870972932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cef132add0e6a6448965ab7cff9d2197, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  PlayerID:
+    m_InternalValue: 5
+  speed: 5
+  jumpForce: 5
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &8173511796698368189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1715044866870972932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04185f70e0c67474e8648619e6b9d8de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  animator: {fileID: 5647915881228006891}
+  rb: {fileID: 9022971275982045194}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  projectilePrefab: {fileID: 8966704392160475773, guid: c7de00553a2ee0f4fb8293ed2b00da44, type: 3}
+  firePoint: {fileID: 7318727185669832282}
+  jumpForce: 5
+  speed: 8
+  OnMove: 1
+  moveInput: {x: 0, y: 0}
+--- !u!114 &7563276859586098108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1715044866870972932}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66fd5cbafec2b6a498d61532be1e1f03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  currentHealth:
+    m_InternalValue: 100
+  maxHealth: 100
 --- !u!1 &1922303670965441281
 GameObject:
   m_ObjectHideFlags: 0

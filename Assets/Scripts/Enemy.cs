@@ -5,7 +5,9 @@ public class Enemy : NetworkBehaviour
 {
     public float moveSpeed = 3f;
     public int damage = 10;
+    public int maxHealth = 100;
 
+    private NetworkVariable<int> currentHealth = new NetworkVariable<int>();
     private GameManager gameManager;
     private Transform playerTarget;
 
@@ -18,6 +20,7 @@ public class Enemy : NetworkBehaviour
     {
         if (IsServer)
         {
+            currentHealth.Value = maxHealth;
             FindClosestPlayer();
         }
     }
@@ -34,6 +37,11 @@ public class Enemy : NetworkBehaviour
 
         Vector3 direction = (playerTarget.position - transform.position).normalized;
         transform.position += direction * moveSpeed * Time.deltaTime;
+
+        if (direction != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(direction);
+        }
     }
 
     private void FindClosestPlayer()
@@ -60,12 +68,23 @@ public class Enemy : NetworkBehaviour
 
         if (other.CompareTag("Player"))
         {
-            // Hacer daño al jugador
             SimplePlayerController player = other.GetComponent<SimplePlayerController>();
             if (player != null)
             {
                 player.TakeDamage(damage);
             }
+        }
+    }
+
+    public void TakeDamage(int damageAmount)
+    {
+        if (!IsServer) return;
+
+        currentHealth.Value -= damageAmount;
+
+        if (currentHealth.Value <= 0)
+        {
+            Die();
         }
     }
 

@@ -24,7 +24,7 @@ public class RandomBuff : NetworkBehaviour
 
     //public void AddHPToPlayer(ulong playerID, int amount)
     //{
-    //    foreach(NetworkObject netObj in NetworkManager.Singleton.SpawnManager.SpawnedObjectsList)
+    //    foreach (NetworkObject netObj in NetworkManager.Singleton.SpawnManager.SpawnedObjectsList)
     //    {
     //        print(netObj.OwnerClientId);
     //        if (netObj.OwnerClientId == playerID && netObj.TryGetComponent<SimplePlayerController>(out _))
@@ -32,7 +32,7 @@ public class RandomBuff : NetworkBehaviour
     //            netObj.GetComponent<SimplePlayerController>().Life.Value += amount;
     //        }
 
-                
+
     //    }
     //}
 

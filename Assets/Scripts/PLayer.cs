@@ -17,6 +17,7 @@ public class PLayer : NetworkBehaviour
     public float speed;
     public bool OnMove = false;
     public Vector2 moveInput = Vector2.zero;
+
     public void OnEnable()
     {
         action.Enable();
@@ -26,24 +27,19 @@ public class PLayer : NetworkBehaviour
         action.Player.Attack.performed += OnAttack;
     }
 
-
-
     public void OnDisable()
     {
-
         action.Player.Move.performed -= OnMovePerformed;
         action.Player.Move.canceled -= OnMoveCanceled;
         action.Player.Jump.performed -= OnJump;
         action.Disable();
     }
+
     private void Awake()
     {
         action = new InputSystem_Actions();
     }
-    void Start()
-    {
 
-    }
     void Update()
     {
         if (!IsOwner) return;
@@ -55,7 +51,6 @@ public class PLayer : NetworkBehaviour
     public void Movement()
     {
         if (OnMove) MovementRpc(moveInput);
-
     }
 
     [Rpc(SendTo.Server)]
@@ -63,32 +58,37 @@ public class PLayer : NetworkBehaviour
     {
         Vector3 move = new Vector3(moveInput.x, rb.linearVelocity.y, moveInput.y);
         rb.linearVelocity = move * speed;
-
     }
+
     private void OnMovePerformed(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();
         OnMove = true;
     }
+
     private void OnMoveCanceled(InputAction.CallbackContext context)
     {
         OnMove = false;
     }
+
     private void OnJump(InputAction.CallbackContext context)
     {
         PerformJumpRpc();
     }
+
     private void OnAttack(InputAction.CallbackContext context)
     {
         if (!IsOwner) return;
         ShootRpc();
     }
+
     [Rpc(SendTo.Server)]
     public void PerformJumpRpc()
     {
         transform.GetComponent<Rigidbody>().AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         animator.SetTrigger("Jump");
     }
+
     [Rpc(SendTo.Server)]
     public void GroundCheckRpc()
     {
@@ -107,9 +107,10 @@ public class PLayer : NetworkBehaviour
     [Rpc(SendTo.Server)]
     public void ShootRpc()
     {
-        GameObject proj = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-        proj.GetComponent<NetworkObject>().Spawn(true);
+        GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        Projectile projectile = proj.GetComponent<Projectile>();
+        projectile.owner = gameObject;
 
-        proj.GetComponent<Rigidbody>().AddForce(Vector3.forward * 5, ForceMode.Impulse);
+        proj.GetComponent<NetworkObject>().Spawn(true);
     }
 }
